@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GhostToWyamConverter": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\Sock\\Desktop\\ghost\\andrew-lock-net-escapades.ghost.2017-08-25.json\" \"C:\\Users\\Sock\\Repos\\blog\\input\\posts\""
+    }
+  }
+}
