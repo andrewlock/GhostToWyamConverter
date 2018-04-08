@@ -14,6 +14,7 @@ namespace GhostToWyamConverter
             // Example
             // args[0] = @"C:\input\andrew-lock-net-escapades.ghost.json";
             // args[1] = @"C:\output\posts";
+            // args[2] = @"C:\output\drafts";
 
             if (args == null || args.Length == 0)
             {
@@ -22,6 +23,11 @@ namespace GhostToWyamConverter
             }
 
             Directory.CreateDirectory(args[1]);
+            Directory.CreateDirectory(args[2]);
+            foreach (var item in Directory.GetFiles(args[1]).Concat(Directory.GetFiles(args[2])))
+            {
+                File.Delete(item);
+            }
 
             using (var stream = File.OpenRead(args[0]))
             using (var txt = new StreamReader(stream))
@@ -48,40 +54,52 @@ namespace GhostToWyamConverter
 
                 foreach (JToken post in jObject["db"].First["data"]["posts"])
                 {
-                    var filename = Path.Combine(args[1], post.Value<string>("slug") + ".md");
+                    string slug = post.Value<string>("slug");
+                    var published = post.Value<string>("published_at");
+                    var filePath = string.IsNullOrEmpty(published) ? args[2] : args[1];
+
+                    var filename = Path.Combine(filePath, slug + ".md");
+
                     Console.WriteLine("Creating " + filename);
+
                     using (var mdFile = File.CreateText(filename))
                     {
                         var postId = post.Value<int>("id");
-                        mdFile.Write("Title: ");
+                        mdFile.WriteLine("---");
+                        mdFile.Write("title: ");
                         mdFile.WriteLine(Escape(post.Value<string>("title")));
 
-                        var published = post.Value<string>("published_at");
                         if (!string.IsNullOrEmpty(published))
                         {
                             var pubDate = DateTimeOffset.Parse(published);
-                            mdFile.WriteLine("Published: {0:O}", pubDate.ToString("dd MMM yy HH:mm"));
+                            mdFile.WriteLine("published_at: {0:O}", pubDate.ToString("dd MMM yy HH:mm"));
                         }
 
-                        mdFile.Write("Image: ");
+                        var updated = post.Value<string>("updated_at");
+                        if (!string.IsNullOrEmpty(published))
+                        {
+                            var pubDate = DateTimeOffset.Parse(published);
+                            mdFile.WriteLine("updated_at: {0:O}", pubDate.ToString("dd MMM yy HH:mm"));
+                        }
+
+                        mdFile.Write("image: ");
                         mdFile.WriteLine(post.Value<string>("image"));
 
                         if (postTags.ContainsKey(postId) && postTags[postId].Any())
                         {
-                            mdFile.WriteLine("Tags: ");
-                            foreach (var tagId in postTags[postId])
-                            {
-                                mdFile.WriteLine("- {0}", tags[tagId]);
-                            }
+                            mdFile.Write("tags: ");
+                            mdFile.WriteLine(string.Join(", ", postTags[postId].Select(x => tags[x])));
                         }
-                        mdFile.Write("Lead: ");
-                        mdFile.WriteLine(Escape(post.Value<string>("meta_description")));
-
-
+                        string excerpt = Escape(post.Value<string>("meta_description"));
+                        if(!string.IsNullOrEmpty(excerpt))
+                        {
+                            mdFile.Write("excerpt: ");
+                            mdFile.WriteLine(excerpt);
+                        }
+                        
                         mdFile.WriteLine("---");
                         string markdown = post.Value<string>("markdown");
-                        mdFile.Write(markdown.Replace(@"```language-", @"```"));
-                        mdFile.Write(markdown.Replace(@"``` language-", @"```"));
+                        mdFile.Write(markdown.Replace(@"```language-", @"```").Replace(@"``` language-", @"```"));
                     }
                 }
             }
