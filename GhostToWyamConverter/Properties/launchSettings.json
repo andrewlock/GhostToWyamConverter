@@ -2,7 +2,7 @@
   "profiles": {
     "GhostToWyamConverter": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Sock\\Downloads\\andrew-lock-net-escapades.ghost.2018-04-08.json\" C:\\repos\\andrewlock\\metalsmith\\src\\posts C:\\repos\\andrewlock\\metalsmith\\src\\drafts"
+      "commandLineArgs": "\"C:\\Users\\Sock\\Downloads\\andrew-lock-net-escapades.ghost.2018-06-04\" C:\\repos\\andrewlock\\metalsmith\\src\\posts C:\\repos\\andrewlock\\metalsmith\\src\\drafts"
     }
   }
 }

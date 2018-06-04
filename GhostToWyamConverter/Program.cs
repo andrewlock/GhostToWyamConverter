@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,6 +10,18 @@ namespace GhostToWyamConverter
 {
     class Program
     {
+        static (string from, string to)[] _pathsToReplace = new[]
+        {
+            ("/content/images/2017/04/dialog.png", "/content/images/dupes/01/dialog.png"),
+            ("/content/images/2017/05/banner.png", "/content/images/dupes/02/banner.png"),
+            ("/content/images/2017/05/banner.PNG", "/content/images/dupes/03/banner.PNG"),
+            ("/content/images/2017/05/Compare.png", "/content/images/dupes/04/Compare.png"),
+            ("/content/images/2017/10/banner.PNG", "/content/images/dupes/05/banner.PNG"),
+            ("/content/images/2017/12/banner.png", "/content/images/dupes/06/banner.png"),
+            ("/content/images/2018/01/banner-1.png", "/content/images/dupes/07/banner-1.png"),
+            ("/content/images/2018/01/banner.png", "/content/images/dupes/08/banner.png"),
+            ("/content/images/2018/02/banner.png", "/content/images/dupes/09/banner.png"),
+        };
         static void Main(string[] args)
         {
             // Example
@@ -72,18 +85,23 @@ namespace GhostToWyamConverter
                         if (!string.IsNullOrEmpty(published))
                         {
                             var pubDate = DateTimeOffset.Parse(published);
-                            mdFile.WriteLine("published_at: {0:O}", pubDate.ToString("dd MMM yy HH:mm"));
+                            mdFile.WriteLine("published_at: {0:O}", pubDate.ToString("dd MMM yyyy HH:mm:ss"));
                         }
 
                         var updated = post.Value<string>("updated_at");
                         if (!string.IsNullOrEmpty(published))
                         {
                             var pubDate = DateTimeOffset.Parse(published);
-                            mdFile.WriteLine("updated_at: {0:O}", pubDate.ToString("dd MMM yy HH:mm"));
+                            mdFile.WriteLine("updated_at: {0:O}", pubDate.ToString("dd MMM yyyy HH:mm:ss"));
                         }
 
                         mdFile.Write("image: ");
-                        mdFile.WriteLine(post.Value<string>("image"));
+                        string blogImage = post.Value<string>("image");
+                        foreach (var pathpair in _pathsToReplace)
+                        {
+                            blogImage = blogImage?.Replace(pathpair.from, pathpair.to);
+                        }
+                        mdFile.WriteLine(blogImage);
 
                         if (postTags.ContainsKey(postId) && postTags[postId].Any())
                         {
@@ -91,15 +109,22 @@ namespace GhostToWyamConverter
                             mdFile.WriteLine(string.Join(", ", postTags[postId].Select(x => tags[x])));
                         }
                         string excerpt = Escape(post.Value<string>("meta_description"));
-                        if(!string.IsNullOrEmpty(excerpt))
+                        if (!string.IsNullOrEmpty(excerpt))
                         {
                             mdFile.Write("excerpt: ");
                             mdFile.WriteLine(excerpt);
                         }
-                        
+
                         mdFile.WriteLine("---");
                         string markdown = post.Value<string>("markdown");
-                        mdFile.Write(markdown.Replace(@"```language-", @"```").Replace(@"``` language-", @"```"));
+                        var content = new StringBuilder(markdown);
+                        content.Replace(@"```language-", @"```");
+                        content.Replace(@"``` language-", @"```");
+                        foreach (var pathpair in _pathsToReplace)
+                        {
+                            content.Replace(pathpair.from, pathpair.to);
+                        }
+                        mdFile.Write(content.ToString());
                     }
                 }
             }
