@@ -67,9 +67,16 @@ namespace GhostToWyamConverter
 
                 foreach (JToken post in jObject["db"].First["data"]["posts"])
                 {
+                    if(post.Value<int>("page") == 1)
+                    {
+                        //don't keep recreating these
+                        continue;
+                    }
                     string slug = post.Value<string>("slug");
                     var published = post.Value<string>("published_at");
-                    var filePath = string.IsNullOrEmpty(published) ? args[2] : args[1];
+
+                    bool isPublished = !string.IsNullOrEmpty(published) && post.Value<string>("status") != "draft";
+                    var filePath = isPublished ? args[1] : args[2];
 
                     var filename = Path.Combine(filePath, slug + ".md");
 
@@ -82,14 +89,14 @@ namespace GhostToWyamConverter
                         mdFile.Write("title: ");
                         mdFile.WriteLine(Escape(post.Value<string>("title")));
 
-                        if (!string.IsNullOrEmpty(published))
+                        if (isPublished)
                         {
                             var pubDate = DateTimeOffset.Parse(published);
                             mdFile.WriteLine("published_at: {0:O}", pubDate.ToString("dd MMM yyyy HH:mm:ss"));
                         }
 
                         var updated = post.Value<string>("updated_at");
-                        if (!string.IsNullOrEmpty(published))
+                        if (isPublished)
                         {
                             var pubDate = DateTimeOffset.Parse(published);
                             mdFile.WriteLine("updated_at: {0:O}", pubDate.ToString("dd MMM yyyy HH:mm:ss"));
