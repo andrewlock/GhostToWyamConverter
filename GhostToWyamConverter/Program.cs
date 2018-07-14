@@ -81,6 +81,17 @@ namespace GhostToWyamConverter
             ("#resizingtheimage", "#resizing-the-image"),
             ("#protectingagainstdosattacks", "#protecting-against-dos-attacks"),
             ("https://andrewlock.net/", "/"),
+            ("/content/images/2018/02/3.-Init-repo.PNG 2397w, 3. Init repo_2.PNG 1198w","/content/images/2018/02/3.-Init-repo.PNG 2397w, /content/images/2018/02/3.-Init-repo_2.PNG 1198w"),
+            ("in the [previous post](/exploring-the-cookieauthenticationmiddleware-in-asp-net-core#theauthenticationhandlermiddleware)", "In the [previous post](/exploring-the-cookieauthenticationmiddleware-in-asp-net-core/)"),
+            ("The [Serilog](github.com/serilog/serilog-aspnetcore)", "The [Serilog](https://github.com/serilog/serilog-aspnetcore)"),
+            ("(loading-tenants-from-the-database-with-saaskit-part-2-caching)","(/loading-tenants-from-the-database-with-saaskit-part-2-caching/)"),
+            ("(/home-home-on-the-range-installing-kubernetes-using-rancher-2-0/#2installdocker)","(/home-home-on-the-range-installing-kubernetes-using-rancher-2-0/#2-install-docker)"),
+            ("(github.com/serilog/serilog-aspnetcore)", "(https://github.com/serilog/serilog-aspnetcore)"),
+            ("(/using-a-culture-constraint-and-catching-404s-using-url-localisation-with-middleware-as-filters/)", "(/using-a-culture-constraint-and-catching-404s-with-the-url-culture-provider/)"),
+            ("[couple of issues](/troubleshooting-asp-net-core-1-1-0-install-problems))", "[couple of issues](/troubleshooting-asp-net-core-1-1-0-install-problems/))"),
+            ("[previous post](/exploring-middleware-as-mvc-filters-in-asp-net-core-1-1-preview-1)","[previous post](/exploring-middleware-as-mvc-filters-in-asp-net-core-1-1/)"),
+            ("[previous post](an-introduction-to-viewcomponents-a-login-status-view-component)", "[previous post](/an-introduction-to-viewcomponents-a-login-status-view-component/)"),
+            ("(#examining-the-file-system-of-an-image-with-an-entrypoint)","(/handy-docker-commands-for-local-development-part-1/#examining-the-file-system-of-an-image-with-an-entrypoint)"),
         };
         static void Main(string[] args)
         {
@@ -185,6 +196,7 @@ namespace GhostToWyamConverter
                         mdFile.WriteLine("---");
                         string markdown = post.Value<string>("markdown");
                         var content = new StringBuilder(markdown);
+                        content.Replace(@"```language-", @"```");
                         content.Replace(@"```language-", @"```");
                         content.Replace(@"``` language-", @"```");
                         foreach (var pathpair in _pathsToReplace)
